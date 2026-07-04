@@ -11,6 +11,10 @@
   <b>A Claude Code plugin that makes the agent aware of your subscription usage limits and pauses work before you hit them.</b>
 </p>
 
+<p align="center">
+  <img src="assets/statusline.png" alt="Claude Code statusline reading: Fable 5 | ctx 5% | 5h 0% (4h 49m left) | 7d 47% (4d 13h left)" width="500">
+</p>
+
 ---
 
 ## What it does
