@@ -3,7 +3,7 @@
   "name": "usage-guard",
   "displayName": "Usage Guard",
   "description": "Makes Claude Code aware of subscription usage limits. Injects live 5h/7d usage into context and pauses tool execution when usage crosses a threshold (default 98%), resuming automatically after the window resets.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": {
     "name": "Gökhan Arkan"
   },
