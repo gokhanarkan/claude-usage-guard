@@ -1,0 +1,20 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "claude-usage-guard",
+  "description": "Marketplace for the usage-guard Claude Code plugin",
+  "owner": {
+    "name": "Gökhan Arkan",
+    "email": "gokhanarkan@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "usage-guard",
+      "description": "Makes Claude Code aware of subscription usage limits. Injects live 5h/7d usage into context and pauses tool execution when usage crosses a threshold (default 98%), resuming automatically after the window resets.",
+      "author": {
+        "name": "Gökhan Arkan"
+      },
+      "category": "productivity",
+      "source": "."
+    }
+  ]
+}
