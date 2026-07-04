@@ -51,48 +51,46 @@ Because the statusline is the only thing that writes `state.json`, both halves a
 
 ## Install
 
-usage-guard has two halves you wire up once: the plugin (the two hooks) and the statusline (the capture that feeds them).
+Three commands, no cloning.
 
-### 1. Clone somewhere stable
-
-```bash
-git clone https://github.com/gokhanarkan/claude-usage-guard.git
-```
-
-### 2. Add it as a marketplace and install
-
-```bash
-claude plugin marketplace add ./claude-usage-guard
-claude plugin install usage-guard@claude-usage-guard
-```
-
-To try the hooks quickly without cloning, you can add the marketplace straight from GitHub instead:
+### 1. Add the marketplace and install the plugin
 
 ```bash
 claude plugin marketplace add gokhanarkan/claude-usage-guard
 claude plugin install usage-guard@claude-usage-guard
 ```
 
-Cloning is recommended because the statusline in the next step needs a stable path to the capture script.
+### 2. Wire the statusline
 
-### 3. Wire the statusline capture
+The hooks read their data from the statusline, and a plugin cannot register the main statusline itself, so this step does it for you. Inside Claude Code, run:
 
-The plugin cannot provide the statusline itself (a session has a single statusline slot that you own), and the hooks depend on it for data. Add this to `~/.claude/settings.json`, pointing at your clone:
+```
+/usage-guard:setup
+```
+
+It copies the capture script to a stable location (`~/.claude/usage-guard/`) and points your `statusLine` at it, so it keeps working across plugin updates. If you already have a statusline, it leaves yours untouched and prints how to run both together. Re-run it after a plugin update to refresh the copy.
+
+<details>
+<summary>Prefer to edit settings.json yourself?</summary>
+
+`/usage-guard:setup` places the capture script at `~/.claude/usage-guard/capture-statusline.sh`. Run it once so that file exists, then, if you would rather own the settings entry, set:
 
 ```json
 {
   "statusLine": {
     "type": "command",
-    "command": "bash /absolute/path/to/claude-usage-guard/scripts/capture-statusline.sh"
+    "command": "bash ~/.claude/usage-guard/capture-statusline.sh"
   }
 }
 ```
 
-Already have a statusline you like? Keep it: set `USAGE_GUARD_INNER_STATUSLINE` to your existing command and the wrapper captures first, then delegates rendering to yours.
+To keep an existing statusline, set `USAGE_GUARD_INNER_STATUSLINE` to your current command; the wrapper captures first, then renders yours.
 
-### 4. Restart and verify
+</details>
 
-Restart Claude Code. `claude plugin list` should show `usage-guard` as enabled, and after the first response your statusline shows the live percentages.
+### 3. Restart and verify
+
+Restart Claude Code, or run `/reload-plugins`. `claude plugin list` should show `usage-guard` as enabled, and after the first response your statusline shows the live percentages.
 
 ## Configuration
 
