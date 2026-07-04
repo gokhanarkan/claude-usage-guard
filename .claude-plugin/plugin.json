@@ -1,0 +1,19 @@
+{
+  "name": "usage-guard",
+  "description": "Makes Claude Code aware of subscription usage limits. Injects live 5h/7d usage into context and pauses tool execution when usage crosses a threshold (default 98%), resuming automatically after the window resets.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Gökhan Arkan"
+  },
+  "homepage": "https://github.com/gokhanarkan/claude-usage-guard",
+  "repository": "https://github.com/gokhanarkan/claude-usage-guard",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "usage",
+    "rate-limit",
+    "hooks",
+    "statusline"
+  ]
+}
