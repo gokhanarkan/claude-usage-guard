@@ -21,6 +21,16 @@ pct=$(jq -r '.rate_limits.five_hour.used_percentage // empty' "$STATE" 2>/dev/nu
 resets=$(jq -r '.rate_limits.five_hour.resets_at // empty' "$STATE" 2>/dev/null || true)
 [ -n "$pct" ] || exit 0
 
+# Timed statusline refreshes keep the file's mtime fresh even when the data
+# inside predates a window reset, so expiry must be checked against resets_at.
+if [ -n "$resets" ] && [ "$resets" != "null" ]; then
+  resets=${resets%.*}
+  if (( now >= resets )); then
+    rm -f "$STATE"
+    exit 0
+  fi
+fi
+
 pct_int=${pct%.*}
 if (( pct_int < THRESHOLD )); then
   exit 0

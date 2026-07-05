@@ -17,6 +17,12 @@ p7=$(jq -r '.rate_limits.seven_day.used_percentage // empty' "$STATE" 2>/dev/nul
 r7=$(jq -r '.rate_limits.seven_day.resets_at // empty' "$STATE" 2>/dev/null || true)
 [ -n "$p5" ] || exit 0
 
+# Skip snapshots whose 5-hour window has already reset: timed statusline
+# refreshes keep the mtime fresh, so only resets_at proves the data is current.
+if [ -n "$r5" ] && [ "$r5" != "null" ] && (( now >= ${r5%.*} )); then
+  exit 0
+fi
+
 fmt_left() {
   local ts=${1%.*}
   [ -n "$ts" ] && [ "$ts" != "null" ] || return 0

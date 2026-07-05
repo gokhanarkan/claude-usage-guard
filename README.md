@@ -28,7 +28,7 @@ Claude Code hooks do **not** receive `rate_limits` on stdin, but the **statuslin
 
 ```mermaid
 flowchart TD
-    A["Claude Code<br/>statusline tick"] -->|"session JSON with rate_limits"| B["capture-statusline.sh"]
+    A["Claude Code<br/>statusline tick<br/>(on events + every 60s)"] -->|"session JSON with rate_limits"| B["capture-statusline.sh"]
     B -->|"writes atomically"| C[("state.json")]
     C -->|"read each prompt"| D["context.sh<br/>UserPromptSubmit hook"]
     C -->|"read each tool call"| E["guard.sh<br/>PreToolUse hook"]
@@ -83,10 +83,13 @@ It copies the capture script to a stable location (`~/.claude/usage-guard/`) and
 {
   "statusLine": {
     "type": "command",
-    "command": "bash ~/.claude/usage-guard/capture-statusline.sh"
+    "command": "bash ~/.claude/usage-guard/capture-statusline.sh",
+    "refreshInterval": 60
   }
 }
 ```
+
+`refreshInterval` makes Claude Code re-run the statusline every 60 seconds on top of its usual event-driven updates. Without it the statusline only runs when new messages arrive, so the captured usage goes stale exactly when you need it most: while long subagent or workflow runs keep the session busy.
 
 To keep an existing statusline, set `USAGE_GUARD_INNER_STATUSLINE` to your current command; the wrapper captures first, then renders yours.
 
@@ -107,6 +110,7 @@ All configuration is via environment variables, so you can set them per shell or
 | `USAGE_GUARD_MAX_WAIT` | `19800` | Maximum seconds a single pause may last (safety cap) |
 | `USAGE_GUARD_STALE_AFTER` | `900` | Ignore captured state older than this many seconds |
 | `USAGE_GUARD_RESET_BUFFER` | `60` | Extra seconds to wait past the official reset time |
+| `USAGE_GUARD_REFRESH_INTERVAL` | `60` | Seconds between timed statusline re-runs (`statusLine.refreshInterval`); read by `/usage-guard:setup` when wiring, so re-run setup after changing it |
 | `USAGE_GUARD_INNER_STATUSLINE` | unset | Your existing statusline command, rendered after capture |
 | `USAGE_GUARD_STATE` | `~/.claude/usage-guard/state.json` | State file location |
 
@@ -133,7 +137,7 @@ That should print a deny JSON. Delete the fake state file afterwards so real cap
 ## Good to know
 
 - **Percentages are usage-based, not time-based.** The 5-hour window resets all at once at `resets_at`; usage does not tick down gradually.
-- **Staleness is handled.** The statusline only updates after API responses. While the guard sleeps, no updates arrive, so the guard deletes the state file after a pause to force a fresh capture.
+- **Staleness is handled.** Setup wires `statusLine.refreshInterval` so the snapshot refreshes every 60 seconds even while subagents or workflows keep the session busy. The hooks additionally ignore state older than `USAGE_GUARD_STALE_AFTER` and discard snapshots whose 5-hour window has already reset, and the guard deletes the state file after a pause to force a fresh capture.
 - **The 7-day window is not guarded by default** (pausing for days is rarely what you want), but the data is in the state file if you want to extend `guard.sh`.
 - **Everything fails open.** No `jq`, no capture yet, or stale data all mean the guard allows the tool call rather than blocking your work.
 
